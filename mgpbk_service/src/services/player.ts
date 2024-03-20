@@ -26,3 +26,11 @@ export const listPlayers = async (): Promise<Player[]> => {
   const snapshot = await firestore.collection("Players").get();
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Player));
 };
+
+export const listPlayersByTeam = async (teamId: string): Promise<Player[]> => {
+  const snapshot = await firestore
+    .collection("Players")
+    .where("teamIds", "array-contains", teamId)
+    .get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Player));
+};

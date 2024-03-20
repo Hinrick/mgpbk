@@ -37,3 +37,13 @@ export const getAllPlayers = async (req: Request, res: Response) => {
     res.status(500).json({ message: (error as Error).message });
   }
 };
+
+export const getPlayersByTeam = async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.params; // Assuming the route parameter is named 'teamId'
+    const players = await PlayerService.listPlayersByTeam(teamId);
+    res.json(players);
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+};
