@@ -26,6 +26,8 @@ export interface Player {
   isLeader?: boolean;
   avatarUrl?: string;
   name?: string;
+  isSigned?: false;
+  isStarting?: false;
 }
 
 export enum PlayerPosition {

@@ -8,10 +8,9 @@ export interface GameEvent {
   gameId: string;
   playerId: string;
   eventType: string; // "TWO_POINTS_ATTEMPT" or "THREE_POINTS_ATTEMPT"
-  details: {
+  details?: {
     success: boolean;
   };
-  timestamp: Date;
   location?: Location;
   createdAt?: Date;
   updatedAt?: Date;

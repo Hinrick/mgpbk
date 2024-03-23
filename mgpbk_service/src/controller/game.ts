@@ -57,9 +57,22 @@ export const deleteGame = async (req: Request, res: Response) => {
   }
 };
 
-export const getGameCheckInListByTeam = async (
-  req: Request,
-  res: Response
-) => {};
+export const getGameCheckInListByTeam = async (req: Request, res: Response) => {
+  try {
+    const { teamId, gameId } = req.params;
+    const games = await GameService.getGameCheckInListByTeam(gameId, teamId);
+    res.json(games);
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+};
 
-export const checkInGame = async (req: Request, res: Response) => {};
+export const checkInGame = async (req: Request, res: Response) => {
+  try {
+    const { teamId, gameId } = req.params;
+    await GameService.updateGameCheckInListByTeam(teamId, gameId, req.body);
+    res.json({ message: "Game checked in successfully", gameId });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+};

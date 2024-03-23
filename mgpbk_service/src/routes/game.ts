@@ -4,12 +4,12 @@ import * as GameController from "../controller/game";
 const router = express.Router();
 
 router.post("/", GameController.createGame);
-router.get("/:seasonId", GameController.getGamesBySeason);
-router.get("/:seasonId/:teamId", GameController.getGameByTeamAndSeason);
+router.get("/season/:seasonId", GameController.getGamesBySeason);
+router.get("/season/:seasonId/:teamId", GameController.getGameByTeamAndSeason);
 router.get("/:id", GameController.getGameDetails);
 router.put("/:id", GameController.updateGameDetails);
 router.delete("/:id", GameController.deleteGame);
-router.get("/checkin/:teamId", GameController.getGameCheckInListByTeam);
-router.post("/checkin/:teamId", GameController.checkInGame);
+router.get("/checkin/:gameId/:teamId", GameController.getGameCheckInListByTeam);
+router.post("/checkin/:gameId/:teamId", GameController.checkInGame);
 
 export default router;

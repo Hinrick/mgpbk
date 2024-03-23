@@ -1,5 +1,6 @@
 import firestore from "../config/firestoreInit";
-import { Game } from "../models/Game";
+import { Player } from "../models/Player";
+import { Game, GameList } from "../models/Game";
 import { listPlayersByTeam } from "./player";
 import { getTeamDetails } from "./team";
 import { QuerySnapshot, DocumentData } from "@google-cloud/firestore";
@@ -23,6 +24,7 @@ export const addGame = async (game: Game): Promise<string> => {
       players: teamAPlyers.map((player) => ({
         ...player,
         isSigned: false,
+        isStarting: false,
       })),
     },
     [game.teamBId]: {
@@ -30,6 +32,7 @@ export const addGame = async (game: Game): Promise<string> => {
       players: teamBPlyers.map((player) => ({
         ...player,
         isSigned: false,
+        isStarting: false,
       })),
     },
   };
@@ -56,9 +59,9 @@ export const listGamesBySeason = async (seasonId: string): Promise<Game[]> => {
     (doc) =>
       ({
         id: doc.id,
+        ...doc.data(),
         createdAt: new Date(doc.data()?.createdAt?._seconds * 1000),
         updatedAt: new Date(doc.data()?.updatedAt?._seconds * 1000),
-        ...doc.data(),
       } as Game)
   );
 };
@@ -99,18 +102,15 @@ export const updateGame = async (
   gameId: string,
   updateData: Partial<Game>
 ): Promise<void> => {
-  const game = await getGame(gameId);
-  if (game.startedDateTime && updateData.startedDateTime) {
-    throw new Error("Game has already started.");
-  } else if (game.endedDateTime && updateData.endedDateTime) {
-    throw new Error("Game has already ended.");
-  } else if (!game) {
+  const game = await firestore.collection("Games").doc(gameId).get();
+  if (!game) {
     throw new Error("Game not found.");
   } else {
     await firestore
       .collection("Games")
       .doc(gameId)
       .update({
+        ...game.data(),
         ...updateData,
         updatedAt: new Date(),
       });
@@ -136,14 +136,64 @@ export const deleteGame = async (gameId: string): Promise<void> => {
   }
 };
 
-// export const getGameCheckInListByTeam = async (
-//   gameId: string,
-//   teamId: string
-// ) => {
-//   const game = await getGame(gameId);
-//   if (game[teamId]) {
-//     return game[teamId].players;
-//   } else {
-//     throw new Error("Team not found.");
-//   }
-// };
+export const getGameCheckInListByTeam = async (
+  gameId: string,
+  teamId: string
+) => {
+  const doc = await firestore.collection("Games").doc(gameId).get();
+  if (!doc.exists) {
+    throw new Error("Game not found.");
+  }
+  return {
+    id: doc.data()?.[teamId].id,
+    name: doc.data()?.[teamId].name,
+    updatedAt: new Date(doc.data()?.[teamId].updatedAt?._seconds * 1000),
+    createdAt: new Date(doc.data()?.[teamId].createdAt?._seconds * 1000),
+    players: doc.data()?.[teamId].players.map((player: any) => ({
+      id: player.id,
+      name: player.name,
+      number: player.number,
+      isSigned: player.isSigned,
+      isStarting: player.isStarting,
+      jerseyNumbers: player.jerseyNumbers,
+      updatedAt: new Date(player.updatedAt?._seconds * 1000),
+    })),
+  } as GameList;
+};
+
+//function that update CheckInListByTeam
+export const updateGameCheckInListByTeam = async (
+  teamId: string,
+  gameId: string,
+  data: Player[]
+) => {
+  const doc = await firestore.collection("Games").doc(gameId).get();
+  if (!doc.exists) {
+    throw new Error("Game not found.");
+  }
+  const team = doc.data()?.[teamId];
+  const players = team.players;
+
+  await firestore
+    .collection("Games")
+    .doc(gameId)
+    .update({
+      [teamId]: {
+        ...team,
+        players: players.map((player: any) => {
+          const filteredPlayer = data.filter((d) => d.id === player.id)[0];
+          if (player.id === filteredPlayer.id) {
+            return {
+              ...player,
+              isSigned: filteredPlayer.isSigned,
+              isStarting: filteredPlayer.isStarting,
+              jerseyNumbers: filteredPlayer.jerseyNumbers,
+              updatedAt: new Date(),
+            };
+          } else {
+            return player;
+          }
+        }),
+      },
+    });
+};

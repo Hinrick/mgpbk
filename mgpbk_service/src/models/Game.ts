@@ -11,3 +11,11 @@ export interface Game {
   updateBy?: string;
   createdBy?: string;
 }
+
+export interface GameList {
+  id: string;
+  name: string;
+  updatedAt: Date;
+  createdAt: Date;
+  players: [];
+}
