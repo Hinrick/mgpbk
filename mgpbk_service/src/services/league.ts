@@ -21,7 +21,14 @@ export const getLeagues = async (): Promise<League[]> => {
     .collection("Leagues")
     .where("isActive", "==", true)
     .get();
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as League));
+  return snapshot.docs.map(
+    (doc) =>
+      ({
+        id: doc.id,
+        updatedAt: new Date(doc.data().updatedAt),
+        ...doc.data(),
+      } as League)
+  );
 };
 
 // Get a single league detail

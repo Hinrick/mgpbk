@@ -9,4 +9,6 @@ export interface League {
   createdAt?: Date;
   updatedAt?: Date;
   isActive: boolean;
+  updateBy?: string;
+  createdBy?: string;
 }

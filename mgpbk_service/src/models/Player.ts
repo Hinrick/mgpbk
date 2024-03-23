@@ -9,11 +9,23 @@ export interface Player {
   weight?: number; // In kilograms
   position: PlayerPosition;
   teamIds?: string[];
-  jerseyNumbers: string[];
+  jerseyNumbers: string;
   isRetired: boolean;
   address?: Address;
   jobType?: JobType;
-  stats?: PlayerStats;
+  // stats?: PlayerStats;
+  createdAt?: Date;
+  updatedAt?: Date;
+  isActive: boolean;
+  updateBy?: string;
+  createdBy?: string;
+  lineId?: string;
+  facebookId?: string;
+  instagramId?: string;
+  phoneNumber?: string;
+  isLeader?: boolean;
+  avatarUrl?: string;
+  name?: string;
 }
 
 export enum PlayerPosition {
@@ -46,11 +58,8 @@ export interface PlayerStats {
 }
 
 export interface Address {
-  street?: string;
   city?: string;
-  state?: string;
-  country?: string;
-  zipCode?: string;
+  dist?: string;
 }
 
 export enum JobType {

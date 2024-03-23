@@ -7,4 +7,9 @@ export interface Team {
   establishmentDate?: string;
   leagueIds?: string[];
   coach?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  isActive: boolean;
+  updateBy?: string;
+  createdBy?: string;
 }

@@ -13,4 +13,9 @@ export interface GameEvent {
   };
   timestamp: Date;
   location?: Location;
+  createdAt?: Date;
+  updatedAt?: Date;
+  isActive: boolean;
+  updateBy?: string;
+  createdBy?: string;
 }

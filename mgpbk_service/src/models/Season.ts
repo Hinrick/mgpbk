@@ -5,4 +5,8 @@ export interface Season {
   startDate: Date;
   endDate: Date;
   isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  updateBy?: string;
+  createdBy?: string;
 }
