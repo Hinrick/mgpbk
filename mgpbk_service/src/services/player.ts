@@ -1,6 +1,7 @@
 // src/services/PlayerService.ts
 import firestore from "../config/firestoreInit";
 import { Player } from "../models/Player";
+import { GameEvent } from "../models/GameEvents";
 
 export const addPlayer = async (playerData: Player): Promise<string> => {
   const dataWithTimestamps = {
@@ -48,6 +49,7 @@ export const updatePlayer = async (
 
 export const listPlayers = async (): Promise<Player[]> => {
   const snapshot = await firestore.collection("Players").get();
+
   return snapshot.docs.map(
     (doc) =>
       ({
@@ -60,6 +62,7 @@ export const listPlayers = async (): Promise<Player[]> => {
         createdAt: new Date(doc.data()?.createdAt?._seconds * 1000),
         updatedAt: new Date(doc.data()?.updatedAt?._seconds * 1000),
         isLeader: doc.data().isLeader,
+        gameEvents: doc.data().gameEvents,
       } as Player)
   );
 };

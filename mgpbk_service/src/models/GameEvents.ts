@@ -7,7 +7,8 @@ export interface GameEvent {
   id?: string;
   gameId: string;
   playerId: string;
-  eventType: string; // "TWO_POINTS_ATTEMPT" or "THREE_POINTS_ATTEMPT"
+  teamId: string;
+  eventType: string;
   details?: {
     success: boolean;
   };
@@ -17,4 +18,29 @@ export interface GameEvent {
   isActive: boolean;
   updateBy?: string;
   createdBy?: string;
+}
+
+export interface State {
+  twoPoints: {
+    goals: number;
+    attempts: number;
+  };
+  threePoints: {
+    goals: number;
+
+    attempts: number;
+  };
+  penalty: {
+    goals: number;
+    attempts: number;
+  };
+  rebounds: {
+    offensive: number;
+    defensive: number;
+  };
+  assists: number;
+  steals: number;
+  blocks: number;
+  fouls: number;
+  turnovers: number;
 }

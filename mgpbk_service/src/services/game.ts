@@ -1,6 +1,7 @@
 import firestore from "../config/firestoreInit";
 import { Player } from "../models/Player";
 import { Game, GameList } from "../models/Game";
+import { GameEvent } from "../models/GameEvents";
 import { listPlayersByTeam } from "./player";
 import { getTeamDetails } from "./team";
 import { QuerySnapshot, DocumentData } from "@google-cloud/firestore";
@@ -25,6 +26,7 @@ export const addGame = async (game: Game): Promise<string> => {
         ...player,
         isSigned: false,
         isStarting: false,
+        isCheckIn: false,
       })),
     },
     [game.teamBId]: {
@@ -33,6 +35,7 @@ export const addGame = async (game: Game): Promise<string> => {
         ...player,
         isSigned: false,
         isStarting: false,
+        isCheckIn: false,
       })),
     },
   };
@@ -43,10 +46,259 @@ export const addGame = async (game: Game): Promise<string> => {
 
 export const getGame = async (gameId: string): Promise<Game> => {
   const doc = await firestore.collection("Games").doc(gameId).get();
+  const doc_events = await firestore
+    .collection("GameEvents")
+    .where("gameId", "==", gameId)
+    .get();
+
+  const events = doc_events.docs.map((doc) => doc.data());
+
   if (!doc.exists) {
     throw new Error("Game not found.");
   }
-  return { id: doc.id, ...doc.data() } as Game;
+
+  const teamAData = doc.data()?.[doc.data()?.teamAId];
+  const teamBData = doc.data()?.[doc.data()?.teamBId];
+
+  // teamAData.players.map((player: any) => {
+  //   const playerEvents = events.filter((e) => e.playerId === player.id);
+  //   const playerState = {
+  //     twoPoints: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "TWO_POINTS_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "TWO_POINTS_ATTEMPT"
+  //       ).length,
+  //     },
+  //     threePoints: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "THREE_POINTS_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "THREE_POINTS_ATTEMPT"
+  //       ).length,
+  //     },
+  //     penalty: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "PENALTY_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "PENALTY_ATTEMPT"
+  //       ).length,
+  //     },
+  //     rebounds: {
+  //       offensive: playerEvents.filter(
+  //         (event) => event.eventType === "OFFENSIVE_REBOUND"
+  //       ).length,
+  //       defensive: playerEvents.filter(
+  //         (event) => event.eventType === "DEFENSIVE_REBOUND"
+  //       ).length,
+  //     },
+  //     assists: playerEvents.filter((event) => event.eventType === "ASSIST")
+  //       .length,
+  //     steals: playerEvents.filter((event) => event.eventType === "STEAL")
+  //       .length,
+  //     blocks: playerEvents.filter((event) => event.eventType === "BLOCK")
+  //       .length,
+  //     fouls: playerEvents.filter((event) => event.eventType === "FOUL").length,
+  //     turnovers: playerEvents.filter((event) => event.eventType === "TURNOVER")
+  //       .length,
+  //   };
+
+  //   return {
+  //     ...player,
+  //     state: playerState,
+  //   };
+  // });
+
+  // teamBData.players.map((player: any) => {
+  //   const playerEvents = events.filter((e) => e.playerId === player.id);
+  //   const playerState = {
+  //     twoPoints: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "TWO_POINTS_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "TWO_POINTS_ATTEMPT"
+  //       ).length,
+  //     },
+  //     threePoints: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "THREE_POINTS_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "THREE_POINTS_ATTEMPT"
+  //       ).length,
+  //     },
+  //     penalty: {
+  //       goals: playerEvents.filter(
+  //         (event) =>
+  //           event.eventType === "PENALTY_ATTEMPT" && event.details?.success
+  //       ).length,
+  //       attempts: playerEvents.filter(
+  //         (event) => event.eventType === "PENALTY_ATTEMPT"
+  //       ).length,
+  //     },
+  //     rebounds: {
+  //       offensive: playerEvents.filter(
+  //         (event) => event.eventType === "OFFENSIVE_REBOUND"
+  //       ).length,
+  //       defensive: playerEvents.filter(
+  //         (event) => event.eventType === "DEFENSIVE_REBOUND"
+  //       ).length,
+  //     },
+  //     assists: playerEvents.filter((event) => event.eventType === "ASSIST")
+  //       .length,
+  //     steals: playerEvents.filter((event) => event.eventType === "STEAL")
+  //       .length,
+  //     blocks: playerEvents.filter((event) => event.eventType === "BLOCK")
+  //       .length,
+  //     fouls: playerEvents.filter((event) => event.eventType === "FOUL").length,
+  //     turnovers: playerEvents.filter((event) => event.eventType === "TURNOVER")
+  //       .length,
+  //   };
+
+  //   return {
+  //     ...player,
+  //     state: playerState,
+  //   };
+  // });
+
+  // const teamAScore = doc
+  //   .data()
+  //   ?.[doc.data()?.teamAId].players.map(
+  //     (player: any) =>
+  //       player.state.twoPoints.goals * 2 +
+  //       player.state.threePoints.goals * 3 +
+  //       player.state.penalty.goals
+  //   )
+  //   .reduce((a: number, b: number) => a + b, 0);
+  // const teamBScore = doc
+  //   .data()
+  //   ?.[doc.data()?.teamBId].players.map(
+  //     (player: any) =>
+  //       player.state.twoPoints.goals * 2 +
+  //       player.state.threePoints.goals * 3 +
+  //       player.state.penalty.goals
+  //   )
+  //   .reduce((a: number, b: number) => a + b, 0);
+
+  // doc.data()?.[doc.data()?.teamAId].players.map((player: any) => {
+  //   console.log(player.state);
+  // });
+
+  return {
+    id: doc.id,
+    ...doc.data(),
+    [doc.data()?.teamAId]: {
+      ...teamAData,
+      // score: teamAScore,
+      players: doc.data()?.[doc.data()?.teamAId].players.map((player: any) => ({
+        ...player,
+        state: {
+          twoPoints: {
+            goals: 0,
+            attempts: 0,
+          },
+          threePoints: {
+            goals: 0,
+            attempts: 0,
+          },
+          penalty: {
+            goals: 0,
+            attempts: 0,
+          },
+          rebounds: {
+            offensive: 0,
+            defensive: 0,
+          },
+          assists: 0,
+          steals: 0,
+          blocks: 0,
+          fouls: 0,
+          turnovers: 0,
+        },
+      })),
+    },
+    [doc.data()?.teamBId]: {
+      ...teamBData,
+      // score: teamBScore,
+      players: doc.data()?.[doc.data()?.teamBId].players.map((player: any) => ({
+        ...player,
+        state: {
+          twoPoints: {
+            goals: events
+              .filter((e) => e.playerId === player.id)
+              .filter(
+                (event) =>
+                  event.eventType === "TWO_POINTS_ATTEMPT" &&
+                  event.details?.success
+              ).length,
+            attempts: events
+              .filter((e) => e.playerId === player.id)
+              .filter((event) => event.eventType === "TWO_POINTS_ATTEMPT")
+              .length,
+          },
+          threePoints: {
+            goals: events
+              .filter((e) => e.playerId === player.id)
+              .filter(
+                (event) =>
+                  event.eventType === "THREE_POINTS_ATTEMPT" &&
+                  event.details?.success
+              ).length,
+            attempts: events
+              .filter((e) => e.playerId === player.id)
+              .filter((event) => event.eventType === "THREE_POINTS_ATTEMPT")
+              .length,
+          },
+          penalty: {
+            goals: events
+              .filter((e) => e.playerId === player.id)
+              .filter(
+                (event) =>
+                  event.eventType === "PENALTY_ATTEMPT" &&
+                  event.details?.success
+              ).length,
+            attempts: events
+              .filter((e) => e.playerId === player.id)
+              .filter((event) => event.eventType === "PENALTY_ATTEMPT").length,
+          },
+          rebounds: {
+            offensive: events
+              .filter((e) => e.playerId === player.id)
+              .filter((event) => event.eventType === "OFFENSIVE_REBOUND")
+              .length,
+            defensive: events
+              .filter((e) => e.playerId === player.id)
+              .filter((event) => event.eventType === "DEFENSIVE_REBOUND")
+              .length,
+          },
+          averageAssistsPerGame: events
+            .filter((e) => e.playerId === player.id)
+            .filter((event) => event.eventType === "ASSIST").length,
+          averageStealsPerGame: events
+            .filter((e) => e.playerId === player.id)
+            .filter((event) => event.eventType === "STEAL").length,
+          averageBlocksPerGame: events
+            .filter((e) => e.playerId === player.id)
+            .filter((event) => event.eventType === "BLOCK").length,
+          fouls: events
+            .filter((e) => e.playerId === player.id)
+            .filter((event) => event.eventType === "FOUL").length,
+          turnovers: events
+            .filter((e) => e.playerId === player.id)
+            .filter((event) => event.eventType === "TURNOVER").length,
+        },
+      })),
+    },
+  } as Game;
 };
 
 export const listGamesBySeason = async (seasonId: string): Promise<Game[]> => {
@@ -55,15 +307,21 @@ export const listGamesBySeason = async (seasonId: string): Promise<Game[]> => {
     .where("seasonId", "==", seasonId)
     .where("isActive", "==", true)
     .get();
-  return snapshot.docs.map(
-    (doc) =>
-      ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: new Date(doc.data()?.createdAt?._seconds * 1000),
-        updatedAt: new Date(doc.data()?.updatedAt?._seconds * 1000),
-      } as Game)
-  );
+
+  return snapshot.docs
+    .sort(
+      (a, b) =>
+        b.data()?.startedDateTime._seconds - a.data()?.startedDateTime._seconds
+    )
+    .map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: new Date(doc.data()?.createdAt?._seconds * 1000),
+          updatedAt: new Date(doc.data()?.updatedAt?._seconds * 1000),
+        } as Game)
+    );
 };
 
 export const listGamesByTeamAndSeason = async (
@@ -155,6 +413,7 @@ export const getGameCheckInListByTeam = async (
       number: player.number,
       isSigned: player.isSigned,
       isStarting: player.isStarting,
+      isCheckedIn: player.isCheckIn,
       jerseyNumbers: player.jerseyNumbers,
       updatedAt: new Date(player.updatedAt?._seconds * 1000),
     })),
@@ -187,6 +446,44 @@ export const updateGameCheckInListByTeam = async (
               ...player,
               isSigned: filteredPlayer.isSigned,
               isStarting: filteredPlayer.isStarting,
+              isCheckedIn: filteredPlayer.isCheckIn,
+              jerseyNumbers: filteredPlayer.jerseyNumbers,
+              updatedAt: new Date(),
+            };
+          } else {
+            return player;
+          }
+        }),
+      },
+    });
+};
+
+export const updateGamePlayerData = async (
+  teamId: string,
+  gameId: string,
+  data: Player[]
+) => {
+  const doc = await firestore.collection("Games").doc(gameId).get();
+  if (!doc.exists) {
+    throw new Error("Game not found.");
+  }
+  const team = doc.data()?.[teamId];
+  const players = team.players;
+
+  await firestore
+    .collection("Games")
+    .doc(gameId)
+    .update({
+      [teamId]: {
+        ...team,
+        players: players.map((player: any) => {
+          const filteredPlayer = data.filter((d) => d.id === player.id)[0];
+          if (player.id === filteredPlayer.id) {
+            return {
+              ...player,
+              isSigned: filteredPlayer.isSigned,
+              isStarting: filteredPlayer.isStarting,
+              isCheckedIn: filteredPlayer.isCheckIn,
               jerseyNumbers: filteredPlayer.jerseyNumbers,
               updatedAt: new Date(),
             };

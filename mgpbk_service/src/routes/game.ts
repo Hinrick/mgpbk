@@ -11,5 +11,6 @@ router.put("/:id", GameController.updateGameDetails);
 router.delete("/:id", GameController.deleteGame);
 router.get("/checkin/:gameId/:teamId", GameController.getGameCheckInListByTeam);
 router.post("/checkin/:gameId/:teamId", GameController.checkInGame);
+router.put("/:gameId/:teamId", GameController.updateGamePlayerData);
 
 export default router;

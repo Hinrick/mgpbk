@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/:leagueId", TeamController.getTeamsByLeague);
 router.get("/detail/:teamId", TeamController.getTeamDetails);
-router.post("/create", TeamController.createTeam);
+router.post("/", TeamController.createTeam);
 router.put("/:teamId", TeamController.updateTeamDetails);
 router.delete("/delete/:teamId", TeamController.deleteTeam);
 

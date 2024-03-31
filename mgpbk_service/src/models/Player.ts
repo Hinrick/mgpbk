@@ -1,4 +1,4 @@
-// src/models/Player.ts
+import { GameEvent } from "./GameEvents";
 
 export interface Player {
   id?: string;
@@ -26,8 +26,12 @@ export interface Player {
   isLeader?: boolean;
   avatarUrl?: string;
   name?: string;
-  isSigned?: false;
-  isStarting?: false;
+  isSigned?: boolean;
+  isStarting?: boolean;
+  isCheckIn?: boolean;
+  gameEvents?: {
+    [gameId: string]: GameEvent[];
+  };
 }
 
 export enum PlayerPosition {

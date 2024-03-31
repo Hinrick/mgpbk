@@ -1,6 +1,5 @@
 import firestore from "../config/firestoreInit";
 import { Team } from "../models/Team";
-import dayjs from "dayjs";
 
 export const addTeam = async (teamData: Team): Promise<string> => {
   const dataWithTimestamps = {
@@ -42,6 +41,7 @@ export const getTeamDetails = async (id: string): Promise<Team> => {
       ...doc.data(),
       createdAt: new Date(doc.data()?.createdAt?._seconds * 1000),
       updatedAt: new Date(doc.data()?.updatedAt?._seconds * 1000),
+      gameEvents: doc.data()?.gameEvents,
     } as Team;
   }
 };

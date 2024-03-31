@@ -1,3 +1,5 @@
+import { GameEvent } from "./GameEvents";
+
 export interface Game {
   id: string;
   teamAId: string;
@@ -10,6 +12,7 @@ export interface Game {
   isActive: boolean;
   updateBy?: string;
   createdBy?: string;
+  gameEvents?: GameEvent[];
 }
 
 export interface GameList {

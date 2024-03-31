@@ -76,3 +76,13 @@ export const checkInGame = async (req: Request, res: Response) => {
     res.status(500).json({ message: (error as Error).message });
   }
 };
+
+export const updateGamePlayerData = async (req: Request, res: Response) => {
+  try {
+    const { teamId, gameId } = req.params;
+    await GameService.updateGamePlayerData(teamId, gameId, req.body);
+    res.json({ message: "Game player data updated successfully", gameId });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+};
